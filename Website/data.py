@@ -1,5 +1,6 @@
 import requests
 import json
+import os
 from typing import Optional, Dict, List, Any, Tuple
 from datetime import datetime
 
@@ -8,7 +9,7 @@ from datetime import datetime
 # 1. Replace the placeholder below with your actual JSONBin.io Master Key.
 # 2. To run the example, you may need to install the requests library: pip install requests
 # =================================================================
-MASTER_KEY = "$2a$10$1JnkDOp7Tc3LAEWBU2ecie3nZWb/4wHlADCzhV0L4xSD3lkjNSYuC"
+MASTER_KEY = os.getenv("JSONBIN_MASTER_KEY")
 BASE_URL = "https://api.jsonbin.io/v3/b"
 
 
