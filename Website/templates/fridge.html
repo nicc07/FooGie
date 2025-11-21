@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🗄️ My Fridge - FooGie</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    .fridge-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    
+    .food-card {
+      background: var(--card-bg);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      border: 2px solid var(--border-color);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    .food-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--accent-color);
+    }
+    
+    .food-card.expiring-soon {
+      border-color: #f59e0b;
+      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    }
+    
+    .food-card.expired {
+      border-color: #ef4444;
+      background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+      opacity: 0.8;
+    }
+    
+    .food-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    
+    .food-icon {
+      font-size: 2.5rem;
+    }
+    
+    .food-info {
+      flex: 1;
+    }
+    
+    .food-name {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      text-transform: capitalize;
+      margin: 0;
+    }
+    
+    .food-type {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      text-transform: capitalize;
+    }
+    
+    .food-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+    
+    .stat-item {
+      background: white;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      border: 1px solid var(--border-color);
+    }
+    
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.25rem;
+    }
+    
+    .stat-value {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    
+    .expiry-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 1rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-top: 0.5rem;
+    }
+    
+    .expiry-fresh {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    
+    .expiry-soon {
+      background: #fed7aa;
+      color: #92400e;
+    }
+    
+    .expiry-expired {
+      background: #fecaca;
+      color: #991b1b;
+    }
+    
+    .loading-spinner {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 300px;
+      font-size: 1.25rem;
+      color: var(--text-secondary);
+    }
+    
+    .empty-fridge {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text-secondary);
+    }
+    
+    .empty-fridge-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+    
+    .filter-section {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+    
+    .filter-btn {
+      padding: 0.5rem 1rem;
+      border: 2px solid var(--border-color);
+      background: white;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+    
+    .filter-btn:hover {
+      border-color: var(--accent-color);
+      background: var(--accent-light);
+    }
+    
+    .filter-btn.active {
+      background: var(--accent-color);
+      color: white;
+      border-color: var(--accent-color);
+    }
+    
+    .summary-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .summary-card {
+      background: linear-gradient(135deg, var(--accent-color) 0%, #8FD9B6 100%);
+      color: white;
+      padding: 1.5rem;
+      border-radius: 1rem;
+      text-align: center;
+    }
+    
+    .summary-number {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    
+    .summary-label {
+      font-size: 0.875rem;
+      opacity: 0.9;
+    }
+    
+    .nutrition-details {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-color);
+    }
+    
+    .nutrition-item {
+      text-align: center;
+    }
+    
+    .nutrition-label {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+    }
+    
+    .nutrition-value {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    
+    .delete-btn {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #ef4444;
+      color: white;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      line-height: 1;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      opacity: 0.9;
+      z-index: 10;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .delete-btn:hover {
+      opacity: 1;
+      transform: scale(1.15);
+      background: #dc2626;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-card">
+        <h3><span>☰</span> Menu</h3>
+        <ul class="menu-list">
+          <li>
+            <a href="/">
+              <span class="icon">🏠</span>
+              <span>Home</span>
+            </a>
+          </li>
+          <li>
+            <a href="/fridge">
+              <span class="icon">🗄️</span>
+              <span>My Fridge</span>
+            </a>
+          </li>
+          <li>
+            <a href="/recipes">
+              <span class="icon">🥗</span>
+              <span>Recipes</span>
+            </a>
+          </li>
+        </ul>
+        
+        <div class="menu-divider"></div>
+        
+        <ul class="menu-list">
+          <li>
+            <a href="/settings">
+              <span class="icon">⚙️</span>
+              <span>Settings</span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="sidebar-footer">
+          <p>Version 1.0.0</p>
+        </div>
+      </div>
+    </aside>
+
+    <div class="container">
+      <header>
+        <h1>🗄️ My Fridge</h1>
+        <p class="subtitle">Track your inventory and reduce food waste</p>
+      </header>
+
+      <main>
+        <div class="card">
+          <!-- Summary Cards -->
+          <div class="summary-cards" id="summary-section">
+            <div class="summary-card">
+              <div class="summary-number" id="total-items">0</div>
+              <div class="summary-label">Total Items</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-number" id="total-calories">0</div>
+              <div class="summary-label">Total Calories</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-number" id="expiring-count">0</div>
+              <div class="summary-label">Expiring Soon</div>
+            </div>
+          </div>
+
+          <!-- Filter Section -->
+          <div class="filter-section">
+            <button class="filter-btn active" data-filter="all">All Items</button>
+            <button class="filter-btn" data-filter="fruit">Fruits</button>
+            <button class="filter-btn" data-filter="vegetable">Vegetables</button>
+            <button class="filter-btn" data-filter="protein">Proteins</button>
+            <button class="filter-btn" data-filter="expiring">Expiring Soon</button>
+          </div>
+
+          <!-- Loading State -->
+          <div id="loading" class="loading-spinner">
+            <div>⏳ Loading your fridge inventory...</div>
+          </div>
+
+          <!-- Empty State -->
+          <div id="empty-state" class="empty-fridge" style="display: none;">
+            <div class="empty-fridge-icon">🍽️</div>
+            <h2>Your fridge is empty!</h2>
+            <p>Start by analyzing some food items on the home page.</p>
+            <a href="/" class="btn btn-primary" style="margin-top: 1rem;">
+              <span>📸</span> Analyze Food
+            </a>
+          </div>
+
+          <!-- Food Grid -->
+          <div class="fridge-grid" id="fridge-grid"></div>
+        </div>
+      </main>
+
+      <footer>
+        <p>Powered by Gemini 2.0 Flash</p>
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    const BIN_ID = "68fd49ac43b1c97be980cfb7";
+    const TEST_BIN_ID = "68fd3d3c43b1c97be980b98b";
+    
+    let allItems = [];
+    let currentFilter = 'all';
+
+    // Delete item function - MUST be global for onclick to work
+    window.deleteItem = async function(index) {
+      if (!confirm('Are you sure you want to remove this item from view?')) {
+        return;
+      }
+      
+      try {
+        // Remove item from local array (only affects display)
+        allItems.splice(index, 1);
+        
+        // Update the display
+        updateSummary();
+        renderFridge(currentFilter);
+        
+        // Show empty state if no items left
+        if (allItems.length === 0) {
+          document.getElementById('fridge-grid').style.display = 'none';
+          document.getElementById('empty-state').style.display = 'block';
+        }
+      } catch (error) {
+        console.error('Error removing item from view:', error);
+        alert('Failed to remove item. Please try again.');
+      }
+    };
+
+    // Food type to emoji mapping
+    const foodEmojis = {
+      'fruit': '🍎',
+      'vegetable': '🥬',
+      'protein': '🍖',
+      'dairy': '🥛',
+      'grain': '🌾',
+      'default': '🍽️'
+    };
+
+    function getFoodEmoji(type) {
+      return foodEmojis[type?.toLowerCase()] || foodEmojis.default;
+    }
+
+    function parseDate(dateStr) {
+      const [day, month, year] = dateStr.split('/');
+      return new Date(year, month - 1, day);
+    }
+
+    function getDaysUntilExpiry(expiryDateStr) {
+      const expiryDate = parseDate(expiryDateStr);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const diffTime = expiryDate - today;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays;
+    }
+
+    function getExpiryStatus(daysUntil) {
+      if (daysUntil < 0) return { class: 'expired', badge: 'expiry-expired', text: 'Expired' };
+      if (daysUntil <= 3) return { class: 'expiring-soon', badge: 'expiry-soon', text: `${daysUntil} days left` };
+      return { class: '', badge: 'expiry-fresh', text: `${daysUntil} days left` };
+    }
+
+    function createFoodCard(item) {
+      const daysUntil = getDaysUntilExpiry(item.expected_expiry_date);
+      const status = getExpiryStatus(daysUntil);
+      
+      return `
+        <div class="food-card ${status.class}" data-type="${item.type}">
+          <div class="food-header">
+            <div class="food-icon">${getFoodEmoji(item.type)}</div>
+            <div class="food-info">
+              <h3 class="food-name">${item.name}</h3>
+              <div class="food-type">${item.type}</div>
+            </div>
+          </div>
+          
+          <div class="food-stats">
+            <div class="stat-item">
+              <div class="stat-label">Quantity</div>
+              <div class="stat-value">${item.quantity} ${item.unit || ''}</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Calories</div>
+              <div class="stat-value">${item.calories}</div>
+            </div>
+          </div>
+          
+          <div class="nutrition-details">
+            <div class="nutrition-item">
+              <div class="nutrition-label">Carbs</div>
+              <div class="nutrition-value">${item.carbs || 0}g</div>
+            </div>
+            <div class="nutrition-item">
+              <div class="nutrition-label">Fats</div>
+              <div class="nutrition-value">${item.fats || 0}g</div>
+            </div>
+            <div class="nutrition-item">
+              <div class="nutrition-label">Protein</div>
+              <div class="nutrition-value">${item.protein || 0}g</div>
+            </div>
+          </div>
+          
+          <span class="expiry-badge ${status.badge}">
+            ${status.text}
+          </span>
+        </div>
+      `;
+    }
+
+    function updateSummary() {
+      // Count distinct items (number of different food entries)
+      const totalItems = allItems.length;
+      const totalCalories = allItems.reduce((sum, item) => sum + (item.calories || 0), 0);
+      const expiringCount = allItems.filter(item => {
+        const days = getDaysUntilExpiry(item.expected_expiry_date);
+        return days >= 0 && days <= 3;
+      }).length;
+
+      document.getElementById('total-items').textContent = totalItems.toLocaleString();
+      document.getElementById('total-calories').textContent = totalCalories.toLocaleString();
+      document.getElementById('expiring-count').textContent = expiringCount;
+    }
+
+    function renderFridge(filter = 'all') {
+      const grid = document.getElementById('fridge-grid');
+      
+      // Sort items by expiration date (earliest/expired first)
+      let sortedItems = [...allItems].sort((a, b) => {
+        const daysA = getDaysUntilExpiry(a.expected_expiry_date);
+        const daysB = getDaysUntilExpiry(b.expected_expiry_date);
+        return daysA - daysB;
+      });
+      
+      let filteredItems = sortedItems;
+      
+      if (filter !== 'all') {
+        if (filter === 'expiring') {
+          filteredItems = sortedItems.filter(item => {
+            const days = getDaysUntilExpiry(item.expected_expiry_date);
+            return days >= 0 && days <= 3;
+          });
+        } else {
+          filteredItems = sortedItems.filter(item => 
+            item.type?.toLowerCase() === filter.toLowerCase()
+          );
+        }
+      }
+      
+      if (filteredItems.length === 0) {
+        grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: var(--text-secondary); padding: 2rem;">No items found for this filter.</div>';
+      } else {
+        grid.innerHTML = filteredItems.map((item, index) => {
+          // Find original index in allItems array
+          const originalIndex = allItems.findIndex(i => i === item);
+          return createFoodCard(item, originalIndex);
+        }).join('');
+      }
+    }
+
+    async function loadFridgeData() {
+      const loading = document.getElementById('loading');
+      const emptyState = document.getElementById('empty-state');
+      const grid = document.getElementById('fridge-grid');
+      
+      try {
+        // Change TEST_BIN_ID to BIN_ID for production use
+        const response = await fetch(`/api/fridge/${TEST_BIN_ID}`);
+        const data = await response.json();
+        
+        loading.style.display = 'none';
+        
+        if (data.inventory && data.inventory.length > 0) {
+          allItems = data.inventory;
+          updateSummary();
+          renderFridge(currentFilter);
+          grid.style.display = 'grid';
+          emptyState.style.display = 'none';
+        } else {
+          grid.style.display = 'none';
+          emptyState.style.display = 'block';
+        }
+      } catch (error) {
+        loading.style.display = 'none';
+        grid.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; color: #ef4444; padding: 2rem;">
+            <h3>⚠️ Error Loading Fridge Data</h3>
+            <p>${error.message}</p>
+          </div>
+        `;
+      }
+    }
+
+    // Filter button event listeners
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        currentFilter = this.dataset.filter;
+        renderFridge(currentFilter);
+      });
+    });
+
+    // Load data on page load
+    loadFridgeData();
+  </script>
+</body>
+</html>

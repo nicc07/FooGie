@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🍔 FooGle - Food Analyzer</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="page-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-card">
+        <h3><span>☰</span> Menu</h3>
+        <ul class="menu-list">
+          <li>
+            <a href="/">
+              <span class="icon">🏠</span>
+              <span>Home</span>
+            </a>
+          </li>
+          <li>
+            <a href="/fridge">
+              <span class="icon">🗄️</span>
+              <span>My Fridge</span>
+            </a>
+          </li>
+          <li>
+            <a href="/recipes">
+              <span class="icon">🥗</span>
+              <span>Recipes</span>
+            </a>
+          </li>
+        </ul>
+        
+        <div class="menu-divider"></div>
+        
+        <ul class="menu-list">
+          <li>
+            <a href="/settings">
+              <span class="icon">⚙️</span>
+              <span>Settings</span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="sidebar-footer">
+          <p>Version 1.0.0</p>
+        </div>
+      </div>
+    </aside>
+
+    <div class="container">
+      <div class="logo-container">
+        <svg width="120" height="120" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+          <!-- Orange outer ring -->
+          <circle cx="250" cy="250" r="200" fill="none" stroke="#FF9966" stroke-width="60"/>
+          <!-- Cut out section -->
+          <path d="M 250 250 L 450 250 A 200 200 0 0 1 380 380 Z" fill="#FF9966"/>
+          <!-- Mint green inner circle -->
+          <circle cx="250" cy="250" r="170" fill="#8FD9B6"/>
+          <!-- Fork -->
+          <g transform="translate(250, 180)">
+            <rect x="-15" y="0" width="30" height="100" rx="15" fill="#2C3E50"/>
+            <rect x="-25" y="-30" width="15" height="50" rx="7" fill="#2C3E50"/>
+            <rect x="-5" y="-30" width="15" height="50" rx="7" fill="#2C3E50"/>
+            <rect x="15" y="-30" width="15" height="50" rx="7" fill="#2C3E50"/>
+          </g>
+        </svg>
+      </div>
+      
+      <header>
+        <h1>FooGie</h1>
+        <p class="subtitle">Analyze calories and freshness with AI</p>
+      </header>
+
+      <main>
+        <div class="card">
+          <form id="analyze-form" enctype="multipart/form-data">
+            
+            <!-- File Upload Section -->
+            <div class="input-group">
+              <label class="label">
+                <span class="label-icon">📁</span>
+                Upload an image
+              </label>
+              <div class="file-input-wrapper">
+                <input type="file" name="image_file" id="image_file" accept="image/*" class="file-input" />
+                <label for="image_file" class="file-input-label">
+                  <span class="file-input-text">Choose file...</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="divider">
+              <span>OR</span>
+            </div>
+
+            <!-- URL Input Section -->
+            <div class="input-group">
+              <label class="label">
+                <span class="label-icon">🔗</span>
+                Enter an image URL
+              </label>
+              <input 
+                type="text" 
+                name="image_url" 
+                placeholder="https://example.com/food-image.jpg" 
+                class="text-input"
+              />
+            </div>
+
+            <div class="divider">
+              <span>OR</span>
+            </div>
+
+            <!-- Camera Section -->
+            <div class="input-group">
+              <label class="label">
+                <span class="label-icon">📸</span>
+                Take a photo
+              </label>
+              <div id="camera-container">
+                <div class="camera-preview">
+                  <video id="video" autoplay playsinline muted class="hidden"></video>
+                  <img id="preview" alt="Captured photo" class="hidden" />
+                </div>
+                <div class="camera-controls">
+                  <button type="button" id="start-camera" class="btn btn-secondary">
+                    <span>📷</span> Start Camera
+                  </button>
+                  <button type="button" id="capture" class="btn btn-secondary hidden">
+                    <span>📸</span> Capture Photo
+                  </button>
+                  <button type="button" id="retake" class="btn btn-secondary hidden">
+                    <span>🔄</span> Retake Photo
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary">
+              <span>✨</span> Analyze Food
+            </button>
+          </form>
+
+          <!-- Results Section -->
+          <div id="result" class="result"></div>
+        </div>
+      </main>
+
+      <footer>
+        <p>Powered by Gemini 2.0 Flash</p>
+      </footer>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/camera.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/analyzer.js') }}"></script>
+<script src="{{ url_for('static', filename='js/calorie-tracker.js') }}"></script>
+</body>
+</html>

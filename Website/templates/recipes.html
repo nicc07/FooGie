@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🥗 Recipes - FooGie</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/recipes.css') }}">
+</head>
+<body>
+  <div class="page-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-card">
+        <h3><span>☰</span> Menu</h3>
+        <ul class="menu-list">
+          <li>
+            <a href="/">
+              <span class="icon">🏠</span>
+              <span>Home</span>
+            </a>
+          </li>
+          <li>
+            <a href="/fridge">
+              <span class="icon">🗄️</span>
+              <span>My Fridge</span>
+            </a>
+          </li>
+          <li>
+            <a href="/recipes" class="active">
+              <span class="icon">🥗</span>
+              <span>Recipes</span>
+            </a>
+          </li>
+        </ul>
+        
+        <div class="menu-divider"></div>
+        
+        <ul class="menu-list">
+          <li>
+            <a href="/settings">
+              <span class="icon">⚙️</span>
+              <span>Settings</span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="sidebar-footer">
+          <p>Version 1.0.0</p>
+        </div>
+      </div>
+    </aside>
+
+    <div class="container">
+      <header>
+        <h1>🥗 Recipe Recommendations</h1>
+        <p class="subtitle">AI-powered recipes using your inventory</p>
+      </header>
+
+      <main>
+        <!-- Recipe Generator Form -->
+        <div class="card">
+          <h2>Generate Recipes</h2>
+          <p class="description">We'll create recipes using ingredients from your fridge, prioritizing items that are expiring soon!</p>
+          
+          <form id="recipe-form">
+            <div class="input-group">
+              <label class="label">
+                <span class="label-icon">🔢</span>
+                Number of recipes
+              </label>
+              <select name="num_recipes" class="text-input">
+                <option value="3">3 recipes</option>
+                <option value="5">5 recipes</option>
+                <option value="7">7 recipes</option>
+              </select>
+            </div>
+
+            <div class="input-group">
+              <label class="label">
+                <span class="label-icon">🥑</span>
+                Dietary restrictions (optional)
+              </label>
+              <input 
+                type="text" 
+                name="dietary_restrictions" 
+                placeholder="e.g., vegetarian, vegan, gluten-free, dairy-free" 
+                class="text-input"
+              />
+            </div>
+
+            <div class="input-group">
+              <label class="label">
+                <span class="label-icon">🌍</span>
+                Cuisine preference (optional)
+              </label>
+              <input 
+                type="text" 
+                name="cuisine_preference" 
+                placeholder="e.g., Italian, Mexican, Asian, Mediterranean" 
+                class="text-input"
+              />
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+              <span>✨</span> Generate Recipes
+            </button>
+          </form>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading" class="loading-state hidden">
+          <div class="loading-spinner"></div>
+          <p>🤖 AI Chef is cooking up some ideas...</p>
+        </div>
+
+        <!-- Recipes Display -->
+        <div id="recipes-container" class="recipes-container"></div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="empty-state hidden">
+          <p>�️ No inventory found!</p>
+          <p class="empty-subtitle">Please <a href="/">add some food items</a> to your fridge first</p>
+        </div>
+      </main>
+
+      <footer>
+        <p>Powered by Gemini 2.0 Flash</p>
+      </footer>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/calorie-tracker.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/recipes.js') }}"></script>
+</body>
+</html>

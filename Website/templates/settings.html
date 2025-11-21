@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⚙️ Settings - FooGie</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    .settings-section {
+      margin-bottom: 2rem;
+    }
+    
+    .settings-section h3 {
+      margin-bottom: 1rem;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .setting-item {
+      background: var(--bg-color);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+      border: 1px solid var(--border-color);
+    }
+    
+    .setting-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+      gap: 1rem;
+    }
+    
+    .setting-label span {
+      font-weight: 600;
+      color: var(--text-primary);
+      flex: 1;
+    }
+    
+    .setting-description {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.75rem;
+    }
+    
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+      flex-shrink: 0;
+      margin-left: auto;
+    }
+    
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 24px;
+    }
+    
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    
+    input:checked + .toggle-slider {
+      background-color: var(--accent-color);
+    }
+    
+    input:checked + .toggle-slider:before {
+      transform: translateX(26px);
+    }
+    
+    .select-input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid var(--border-color);
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      background: white;
+    }
+    
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+    
+    .save-settings {
+      position: sticky;
+      bottom: 1rem;
+      background: var(--card-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      box-shadow: var(--shadow-lg);
+      margin-top: 2rem;
+    }
+
+    .current-log-section {
+      background: linear-gradient(135deg, var(--secondary-color) 0%, var(--accent-color) 100%);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: white;
+    }
+
+    .log-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .log-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .log-stat {
+      text-align: center;
+    }
+
+    .log-stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .log-stat-label {
+      font-size: 0.75rem;
+      opacity: 0.9;
+    }
+
+    .meals-list {
+      margin-top: 1rem;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .meal-item {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .meal-info {
+      flex: 1;
+    }
+
+    .meal-name {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .meal-calories {
+      font-size: 0.875rem;
+      opacity: 0.9;
+    }
+
+    .meal-delete {
+      background: rgba(239, 68, 68, 0.8);
+      border: none;
+      color: white;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .meal-delete:hover {
+      background: rgba(220, 38, 38, 1);
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-card">
+        <h3><span>☰</span> Menu</h3>
+        <ul class="menu-list">
+          <li>
+            <a href="/">
+              <span class="icon">🏠</span>
+              <span>Home</span>
+            </a>
+          </li>
+          <li>
+            <a href="/fridge">
+              <span class="icon">🗄️</span>
+              <span>My Fridge</span>
+            </a>
+          </li>
+          <li>
+            <a href="/recipes">
+              <span class="icon">🥗</span>
+              <span>Recipes</span>
+            </a>
+          </li>
+        </ul>
+        
+        <div class="menu-divider"></div>
+        
+        <ul class="menu-list">
+          <li>
+            <a href="/settings">
+              <span class="icon">⚙️</span>
+              <span>Settings</span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="sidebar-footer">
+          <p>Version 1.0.0</p>
+        </div>
+      </div>
+    </aside>
+
+    <div class="container">
+      <header>
+        <h1>⚙️ Settings</h1>
+        <p class="subtitle">Customize your FooGie experience</p>
+      </header>
+
+      <main>
+        <!-- Today's Calorie Log -->
+        <div class="current-log-section" id="current-log">
+          <div class="log-header">
+            <h3 style="margin: 0;">📊 Today's Progress</h3>
+            <button class="btn btn-danger" id="reset-log-btn" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+              Reset Day
+            </button>
+          </div>
+          <div class="log-stats" id="log-stats"></div>
+          <div id="meals-list"></div>
+        </div>
+
+        <div class="card">
+          <form id="settings-form">
+            
+            <!-- Application Settings -->
+            <div class="settings-section">
+              <h3>📱 Application Settings</h3>
+              <div class="setting-item">
+                <div class="setting-label">
+                  <span>Notifications</span>
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="notifications" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+                <div class="setting-description">
+                  Receive notifications for expiring food items
+                </div>
+              </div>
+            </div>
+
+            <!-- Nutrition Settings -->
+            <div class="settings-section">
+              <h3>🍽️ Nutrition Settings</h3>
+              
+              <div class="setting-item">
+                <div class="setting-label">
+                  <span>Daily Calorie Goal</span>
+                </div>
+                <div class="setting-description">
+                  Set your daily calorie target for better nutritional tracking
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <input 
+                    type="number" 
+                    id="daily-calories" 
+                    min="0" 
+                    max="10000" 
+                    step="50"
+                    class="text-input"
+                    style="flex: 1;"
+                    placeholder="e.g., 2000"
+                  >
+                  <span style="color: var(--text-secondary); white-space: nowrap;">calories</span>
+                </div>
+              </div>
+              
+              <div class="setting-item">
+                <div class="setting-label">
+                  <span>Daily Number of Meals</span>
+                </div>
+                <div class="setting-description">
+                  How many meals do you typically eat per day?
+                </div>
+                <select class="select-input" id="daily-meals">
+                  <option value="1">1 meal</option>
+                  <option value="2">2 meals</option>
+                  <option value="3" selected>3 meals</option>
+                  <option value="4">4 meals</option>
+                  <option value="5">5 meals</option>
+                  <option value="6">6+ meals</option>
+                </select>
+              </div>
+              
+              <div class="setting-item">
+                <div class="setting-label">
+                  <span>Show Calorie Progress</span>
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="show-calorie-progress" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+                <div class="setting-description">
+                  Display daily calorie progress and remaining calories
+                </div>
+              </div>
+              
+              <div class="setting-item">
+                <div class="setting-label">
+                  <span>Meal Reminders</span>
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="meal-reminders">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+                <div class="setting-description">
+                  Receive reminders based on your meal schedule
+                </div>
+              </div>
+            </div>
+
+            <!-- Save Settings -->
+            <div class="save-settings">
+              <button type="submit" class="btn btn-primary" style="width: 100%;">
+                <span>💾</span> Save Settings
+              </button>
+            </div>
+          </form>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/calorie-tracker.js') }}"></script>
+  <script>
+    // Display current log
+    function displayCurrentLog() {
+      if (!window.calorieTracker) {
+        document.getElementById('log-stats').innerHTML = '<p style="text-align: center; opacity: 0.9;">Calorie tracker not available</p>';
+        document.getElementById('meals-list').innerHTML = '';
+        return;
+      }
+
+      const summary = window.calorieTracker.getSummary();
+      const meals = window.calorieTracker.getTodaysMeals();
+      
+      const statsDiv = document.getElementById('log-stats');
+      statsDiv.innerHTML = `
+        <div class="log-stat">
+          <div class="log-stat-value">${summary.goal}</div>
+          <div class="log-stat-label">Goal</div>
+        </div>
+        <div class="log-stat">
+          <div class="log-stat-value">${summary.consumed}</div>
+          <div class="log-stat-label">Consumed</div>
+        </div>
+        <div class="log-stat">
+          <div class="log-stat-value ${summary.isOverGoal ? 'over-goal' : ''}">${summary.remaining}</div>
+          <div class="log-stat-label">Remaining</div>
+        </div>
+        <div class="log-stat">
+          <div class="log-stat-value">${summary.mealsLeft}</div>
+          <div class="log-stat-label">Meals Left</div>
+        </div>
+      `;
+
+      const mealsDiv = document.getElementById('meals-list');
+      if (meals.length > 0) {
+        mealsDiv.innerHTML = `
+          <h4 style="margin: 1rem 0 0.5rem 0; font-size: 0.875rem; opacity: 0.9;">Today's Meals</h4>
+          <div class="meals-list">
+            ${meals.map((meal, index) => `
+              <div class="meal-item">
+                <div class="meal-info">
+                  <div class="meal-name">${meal.name}</div>
+                  <div class="meal-calories">${meal.calories} cal | P: ${meal.protein}g C: ${meal.carbs}g F: ${meal.fats}g</div>
+                </div>
+                <button class="meal-delete" onclick="deleteMeal(${index})">×</button>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } else {
+        mealsDiv.innerHTML = '<p style="margin-top: 1rem; opacity: 0.9; font-size: 0.875rem;">No meals logged today</p>';
+      }
+    }
+
+    window.deleteMeal = function(index) {
+      if (!window.calorieTracker) return;
+      if (confirm('Delete this meal entry?')) {
+        window.calorieTracker.deleteMeal(index);
+        displayCurrentLog();
+      }
+    };
+
+    // Reset log button
+    document.getElementById('reset-log-btn').addEventListener('click', function(e) {
+      e.preventDefault();
+      if (!window.calorieTracker) {
+        alert('Calorie tracker not available');
+        return;
+      }
+      if (confirm('Reset today\'s calorie log? This cannot be undone.')) {
+        window.calorieTracker.resetLog();
+        displayCurrentLog();
+        alert('Log reset successfully!');
+      }
+    });
+
+    // Load saved settings
+    document.addEventListener('DOMContentLoaded', function() {
+      const savedSettings = JSON.parse(localStorage.getItem('foogie-settings') || '{}');
+      
+      // Apply saved settings to form elements
+      document.getElementById('notifications').checked = savedSettings.notifications !== false;
+      
+      // Nutrition settings
+      document.getElementById('daily-calories').value = savedSettings.dailyCalories || '2000';
+      document.getElementById('daily-meals').value = savedSettings.dailyMeals || '3';
+      document.getElementById('show-calorie-progress').checked = savedSettings.showCalorieProgress !== false;
+      document.getElementById('meal-reminders').checked = savedSettings.mealReminders || false;
+      
+      // Display current log
+      displayCurrentLog();
+    });
+
+    // Handle form submission
+    document.getElementById('settings-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const settings = {
+        notifications: document.getElementById('notifications').checked,
+        // Nutrition settings
+        dailyCalories: parseInt(document.getElementById('daily-calories').value) || 2000,
+        dailyMeals: parseInt(document.getElementById('daily-meals').value) || 3,
+        showCalorieProgress: document.getElementById('show-calorie-progress').checked,
+        mealReminders: document.getElementById('meal-reminders').checked
+      };
+      
+      // Save to localStorage
+      localStorage.setItem('foogie-settings', JSON.stringify(settings));
+      
+      // Update calorie tracker settings if it exists
+      if (window.calorieTracker) {
+        window.calorieTracker.updateSettings(settings);
+      }
+      
+      // Refresh display
+      displayCurrentLog();
+      
+      // Show success message
+      alert('Settings saved successfully!');
+    });
+  </script>
+</body>
+</html>
