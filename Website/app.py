@@ -17,10 +17,10 @@ app = Flask(__name__)
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 # id for the json bin. Stores all data.
-BIN_ID = "68fd49ac43b1c97be980cfb7"
+BIN_ID = os.getenv("BIN_ID")
 
 # id for testing only, contains garbage.
-TEST_BIN_ID = "68fd3d3c43b1c97be980b98b"
+TEST_BIN_ID = os.getenv("TEST_BIN_ID")
 
 
 @app.route("/")
